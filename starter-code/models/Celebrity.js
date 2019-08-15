@@ -10,6 +10,9 @@ const celebSchema = new Schema ({
 
 })
 
+// The first value after mongoose.model is the name of the model,
+// and will become the collection in the database.
+// Mongoose expects the name of the model to be singular
 const Celebrity = mongoose.model("Celebrity", celebSchema);
 
 module.exports = Celebrity;
