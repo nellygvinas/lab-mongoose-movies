@@ -3,6 +3,7 @@ const router  = express.Router();
 const User    = require('../models/User');
 
 const bcrypt = require('bcryptjs');
+const passport = require("passport");
 
 
 router.get('/signup', (req, res, next)=>{
@@ -13,11 +14,20 @@ router.get('/signup', (req, res, next)=>{
 
 router.post('/signup', (req, res, next)=>{
 
+    // Assign username and password from the form to variables.
+    // The form values are grabbed used req.body.+ name value of the input
     let username = req.body.theUsername;
-    let pword = req.body.thePassword;
+    let password = req.body.thePassword;
 
-    let salt = bcrypt.genSaltSync(10);
-    const hashedPassword = bcrypt.hashSync(pword, salt);
+    // If no username or password upon signup, a message appears
+    // and user is redirected to /signup page
+    if(!username || !password){
+      req.flash('error', 'please provide both the username and password to login.')
+      res.redirect('/signup')
+    }
+
+    const salt = bcrypt.genSaltSync(10);
+    const hashedPassword = bcrypt.hashSync(password, salt);
 
     User.create({username: username, password: hashedPassword})
     .then(()=>{
@@ -33,46 +43,65 @@ router.get('/login', (req, res, next)=>{
   res.render('user-views/login')
 })
 
-router.post('/login', (req, res, next)=>{
-  const userName = req.body.theUsername;
-  const passWord = req.body.userPassword;
+
+// PREVIOUS LOGIN WITHOUT PASSPORT:
+// router.post('/login', (req, res, next)=>{
+//   const uName = req.body.theUsername;
+//   const pWord = req.body.thePassword;
 
 
-  User.findOne({ "username": userName })
-  .then(user => {
-    if (!user) {
-      res.redirect('/')
-    }
-    if (bcrypt.compareSync(passWord, user.password)) {
-      // Save the login in the session!
-      req.session.currentlyLoggedIn = user;
-      res.redirect("/celebrities");
-    } else {
-      res.render("auth/login", {
-        errorMessage: "Incorrect password"
-      });
-    }
+//   User.findOne({ "username": uName })
+//   .then(user => {
+//     if (!user) {
+//       res.redirect('/signup')
+//     }
+//     if (bcrypt.compareSync(pWord, user.password)) {
+//       // Saves the login in the session info
+//       req.session.currentlyLoggedIn = user;
+//       res.redirect("/celebrities");
+//     } else {
+//       res.render("auth/login", {
+//         errorMessage: "Incorrect password"
+//       });
+//     }
+//   })
+//   .catch(error => {
+//     next(error);
+//   })
+
+// })
+
+router.post('/login', passport.authenticate('local', {successRedirect: '/celebrities',
+  failureRedirect: '/login',
+  failureFlash: true,
+  passReqToCallback: true
   })
-  .catch(error => {
-    next(error);
-  })
-
-})
+);
 
 
 router.post('/logout', (req, res, next)=>{
-    req.session.destroy()
-    res.redirect('/celebrities')
+  req.logout(); 
+  // Previous version using express session
+  //     req.session.destroy()
+  res.redirect('/')
 })
+    
+    
+router.get('/members-page', (req, res, next)=>{
 
+  if(!req.user){
+    req.flash('error', 'please log in to view the secret page')
+    res.redirect('/login')
+  }
 
-router.get('/secret', (req, res, next)=>{
+  res.render('user-views/members-page')
 
-    if(req.session.currentlyLoggedIn){
-        res.render('secret')
-    } else{
-        res.redirect('/celebrities')
-    }
+  // Previous version
+  //   if(req.session.currentlyLoggedIn){
+  //       res.render('user-views/members-page')
+  //   } else{
+  //       res.redirect('/celebrities')
+  //   }
 
 
 })

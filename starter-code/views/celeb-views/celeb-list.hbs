@@ -1,17 +1,34 @@
-<a href="/celebrities/new">Add a Celebrity</a>
+<a href="/members-page">Access Members Page</a>
 
 <h2> Celebrity Database </h2>
 <div>
+
+<a href="/celebrities/new">Add a Celebrity</a>
 
 {{#each allCelebrities}}
   <a href="/celebrities/celeb-details/{{this._id}}">
     <h3>{{this.name}}</h3>
   </a>
 
-  <a href="/celebrities/edit/{{this._id}}"><button>Edit</button></a>
+{{#if this.owned}}
+
+<a href="/celebrities/edit/{{this._id}}"><button>Edit</button></a>
+<form action="/celebrities/{{this._id}}/delete" method="POST">
+    <button>Delete</button>
+
+{{else}}
+
+<span style="width: 33%"></span>
+<span style="width: 33%"></span>
+
+{{/if}}
+
+{{!-- Previous way: can edit and delete celebs if not owned by you. --}}
+
+  {{!-- <a href="/celebrities/edit/{{this._id}}"><button>Edit</button></a>
   <form action="/celebrities/{{this._id}}/delete" method="POST">
     <button>Delete</button>
-  </form>
+  </form> --}}
   
 {{/each}}
 </div>

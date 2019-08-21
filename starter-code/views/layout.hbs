@@ -9,6 +9,23 @@
 </head>
 <body>
 
+
+<nav>
+  {{!-- With passport, you set the current user through the app.js, 
+  res.locals.currentUser = req.user; --}} 
+  {{#if currentUser}} 
+  <h3>Welcome, {{currentUser.username}}</h3>
+
+  <form action="/logout" method="POST">
+    <button>Logout</button>
+  </form>
+
+  {{else}}
+  <a href="/login">Login</a>
+  <a href="/signup">Create Account</a>
+  {{/if}}
+  </nav>
+
   {{{body}}}
 
   <script src="/javascripts/script.js"></script>
